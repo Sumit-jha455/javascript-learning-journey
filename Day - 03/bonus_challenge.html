@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Number Comparison Tool</title>
+</head>
+<body>
+	<script>
+		// 🏆 Bonus Challenge: Number Comparison Tool
+
+		const count = Number(prompt("How many numbers do you want to compare? (2 or 3)"));
+
+		if (count !== 2 && count !== 3) {
+			console.log("Please choose either 2 or 3 numbers.");
+		} else {
+			const numbers = [];
+
+			for (let i = 0; i < count; i++) {
+				numbers.push(Number(prompt(`Enter number ${i + 1}:`)));
+			}
+
+			if (numbers.some((number) => Number.isNaN(number))) {
+				console.log("Please enter valid numbers.");
+			} else {
+				const largest = Math.max(...numbers);
+				const smallest = Math.min(...numbers);
+				const equalValues = [...new Set(
+					numbers.filter((number) => numbers.filter((value) => value === number).length > 1)
+				)];
+
+				console.log(`Largest: ${largest}`);
+				console.log(`Smallest: ${smallest}`);
+				console.log(
+					equalValues.length > 0
+						? `Equal values: ${equalValues.join(", ")}`
+						: "Equal values: None"
+				);
+			}
+		}
+	</script>
+</body>
+</html>
