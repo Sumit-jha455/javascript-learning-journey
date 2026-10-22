@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Student Result Management System</title>
+	<style>
+		body { font-family: Arial, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; }
+		.box { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+		h1, h2 { text-align: center; color: #174a7e; }
+		form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+		input, button { padding: 10px; border: 1px solid #aaa; border-radius: 5px; }
+		button { background: #174a7e; color: white; border: 0; cursor: pointer; }
+		button:hover { background: #0e355b; }
+		.search { display: flex; gap: 10px; margin: 20px 0; }
+		.search input { flex: 1; }
+		table { width: 100%; border-collapse: collapse; }
+		th, td { border: 1px solid #ccc; padding: 9px; text-align: center; }
+		th { background: #174a7e; color: white; }
+		.edit { background: #d88a17; }
+		.delete { background: #c0392b; }
+		#message { text-align: center; color: #c0392b; min-height: 20px; }
+		.summary { display: flex; justify-content: space-around; margin: 15px 0; flex-wrap: wrap; }
+		@media (max-width: 700px) { form { grid-template-columns: 1fr; } table { font-size: 12px; } }
+	</style>
+</head>
+<body>
+	<div class="box">
+		<h1>Student Result Management System</h1>
+
+		<form id="studentForm">
+			<input id="name" placeholder="Student Name" required>
+			<input id="roll" placeholder="Roll Number" required>
+			<input id="course" placeholder="Course" required>
+			<input id="marks" type="number" min="0" max="100" placeholder="Marks" required>
+			<button id="saveButton" type="submit">Add Student</button>
+			<button type="button" onclick="clearForm()">Clear</button>
+		</form>
+		<p id="message"></p>
+
+		<div class="search">
+			<input id="search" placeholder="Search by name, roll number, or course" oninput="searchStudents()">
+			<button type="button" onclick="findTopper()">Find Topper</button>
+		</div>
+
+		<div class="summary">
+			<b>Total Students: <span id="total">0</span></b>
+			<b>Average Marks: <span id="average">0</span></b>
+			<b>Topper: <span id="topper">-</span></b>
+		</div>
+
+		<h2>Student Records</h2>
+		<table>
+			<thead>
+				<tr><th>Name</th><th>Roll Number</th><th>Course</th><th>Marks</th><th>Result</th><th>Actions</th></tr>
+			</thead>
+			<tbody id="studentList"></tbody>
+		</table>
+	</div>
+
+	<script>
+		// Array for storing student objects.
+		let students = [];
+		let editingIndex = -1;
+
+		document.getElementById("studentForm").addEventListener("submit", function (event) {
+			event.preventDefault();
+
+			const student = {
+				name: document.getElementById("name").value.trim(),
+				roll: document.getElementById("roll").value.trim(),
+				course: document.getElementById("course").value.trim(),
+				marks: Number(document.getElementById("marks").value)
+			};
+
+			if (student.marks < 0 || student.marks > 100) {
+				showMessage("Marks must be between 0 and 100.");
+				return;
+			}
+
+			const rollExists = students.some(function (item, index) {
+				return item.roll === student.roll && index !== editingIndex;
+			});
+			if (rollExists) {
+				showMessage("This roll number already exists.");
+				return;
+			}
+
+			if (editingIndex === -1) {
+				students.push(student);
+				showMessage("Student added successfully.", "green");
+			} else {
+				students[editingIndex] = student;
+				editingIndex = -1;
+				document.getElementById("saveButton").textContent = "Add Student";
+				showMessage("Student updated successfully.", "green");
+			}
+
+			clearForm();
+			displayStudents(students);
+		});
+
+		function displayStudents(list) {
+			const studentList = document.getElementById("studentList");
+			studentList.innerHTML = "";
+
+			list.forEach(function (student) {
+				const index = students.indexOf(student);
+				const row = document.createElement("tr");
+				row.innerHTML = `<td>${student.name}</td>
+					<td>${student.roll}</td><td>${student.course}</td><td>${student.marks}</td>
+					<td>${student.marks >= 33 ? "Pass" : "Fail"}</td>
+					<td><button class="edit" onclick="editStudent(${index})">Edit</button>
+					<button class="delete" onclick="deleteStudent(${index})">Delete</button></td>`;
+				studentList.appendChild(row);
+			});
+			updateSummary();
+		}
+
+		function editStudent(index) {
+			const student = students[index];
+			document.getElementById("name").value = student.name;
+			document.getElementById("roll").value = student.roll;
+			document.getElementById("course").value = student.course;
+			document.getElementById("marks").value = student.marks;
+			editingIndex = index;
+			document.getElementById("saveButton").textContent = "Update Student";
+			window.scrollTo(0, 0);
+		}
+
+		function deleteStudent(index) {
+			if (confirm("Delete this student?")) {
+				students.splice(index, 1);
+				displayStudents(students);
+			}
+		}
+
+		function searchStudents() {
+			const text = document.getElementById("search").value.toLowerCase();
+			const results = students.filter(function (student) {
+				return student.name.toLowerCase().includes(text) ||
+					student.roll.toLowerCase().includes(text) || student.course.toLowerCase().includes(text);
+			});
+			displayStudents(results);
+		}
+
+		function findTopper() {
+			if (students.length === 0) {
+				showMessage("No students found.");
+				return;
+			}
+			const topper = students.reduce(function (best, student) {
+				return student.marks > best.marks ? student : best;
+			});
+			document.getElementById("topper").textContent = topper.name + " (" + topper.marks + ")";
+		}
+
+		function updateSummary() {
+			document.getElementById("total").textContent = students.length;
+			const totalMarks = students.reduce(function (sum, student) { return sum + student.marks; }, 0);
+			document.getElementById("average").textContent = students.length ? (totalMarks / students.length).toFixed(2) : 0;
+			if (students.length === 0) document.getElementById("topper").textContent = "-";
+		}
+
+		function clearForm() {
+			document.getElementById("studentForm").reset();
+			editingIndex = -1;
+			document.getElementById("saveButton").textContent = "Add Student";
+		}
+
+		function showMessage(text, color) {
+			const message = document.getElementById("message");
+			message.textContent = text;
+			message.style.color = color || "#c0392b";
+			setTimeout(function () { message.textContent = ""; }, 2500);
+		}
+
+		displayStudents(students);
+	</script>
+</body>
+</html>

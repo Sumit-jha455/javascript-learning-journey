@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Calculator</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f2f2f2;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 100vh;
+		}
+
+		.calculator {
+			background-color: white;
+			width: 300px;
+			padding: 20px;
+			border-radius: 10px;
+			box-shadow: 0 0 10px #999;
+		}
+
+		h1 {
+			text-align: center;
+			color: #333;
+		}
+
+		input {
+			width: 100%;
+			box-sizing: border-box;
+			padding: 12px;
+			margin: 8px 0;
+			font-size: 18px;
+		}
+
+		.buttons {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 8px;
+			margin-top: 10px;
+		}
+
+		button {
+			padding: 12px 5px;
+			border: none;
+			border-radius: 5px;
+			background-color: #1976d2;
+			color: white;
+			font-size: 15px;
+			cursor: pointer;
+		}
+
+		button:hover {
+			background-color: #125ca3;
+		}
+
+		#clear {
+			background-color: #d32f2f;
+		}
+
+		#result {
+			margin-top: 18px;
+			text-align: center;
+			font-size: 20px;
+			font-weight: bold;
+			color: #333;
+		}
+	</style>
+</head>
+<body>
+	<div class="calculator">
+		<h1>Calculator</h1>
+
+		<input type="number" id="number1" placeholder="Enter first number">
+		<input type="number" id="number2" placeholder="Enter second number">
+
+		<div class="buttons">
+			<button onclick="calculate('+')">Addition (+)</button>
+			<button onclick="calculate('-')">Subtraction (-)</button>
+			<button onclick="calculate('*')">Multiplication (*)</button>
+			<button onclick="calculate('/')">Division (/)</button>
+			<button onclick="calculate('%')">Modulus (%)</button>
+			<button onclick="calculate('percent')">Percentage</button>
+			<button onclick="calculate('square')">Square</button>
+			<button onclick="calculate('root')">Square Root</button>
+			<button id="clear" onclick="clearCalculator()">Clear</button>
+		</div>
+
+		<div id="result">Result: 0</div>
+	</div>
+
+	<script>
+		function calculate(operation) {
+			let firstNumber = Number(document.getElementById("number1").value);
+			let secondNumber = Number(document.getElementById("number2").value);
+			let answer;
+
+			if (operation === "square") {
+				answer = firstNumber * firstNumber;
+			} else if (operation === "root") {
+				if (firstNumber < 0) {
+					showResult("Cannot find the root of a negative number");
+					return;
+				}
+				answer = Math.sqrt(firstNumber);
+			} else if (operation === "percent") {
+				answer = (firstNumber / 100) * secondNumber;
+			} else {
+				if (operation === "/" && secondNumber === 0) {
+					showResult("Cannot divide by zero");
+					return;
+				}
+
+				if (operation === "+") {
+					answer = firstNumber + secondNumber;
+				} else if (operation === "-") {
+					answer = firstNumber - secondNumber;
+				} else if (operation === "*") {
+					answer = firstNumber * secondNumber;
+				} else if (operation === "/") {
+					answer = firstNumber / secondNumber;
+				} else if (operation === "%") {
+					answer = firstNumber % secondNumber;
+				}
+			}
+
+			showResult(answer);
+		}
+
+		function showResult(value) {
+			document.getElementById("result").textContent = "Result: " + value;
+		}
+
+		function clearCalculator() {
+			document.getElementById("number1").value = "";
+			document.getElementById("number2").value = "";
+			document.getElementById("result").textContent = "Result: 0";
+		}
+	</script>
+</body>
+</html>

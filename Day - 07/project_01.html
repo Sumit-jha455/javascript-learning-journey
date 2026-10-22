@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Digital Clock</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--background: linear-gradient(135deg, #dbeafe, #f8fafc);
+			--card: rgba(255, 255, 255, 0.88);
+			--text: #172554;
+			--muted: #64748b;
+			--accent: #2563eb;
+		}
+
+		body.dark {
+			color-scheme: dark;
+			--background: linear-gradient(135deg, #020617, #172554);
+			--card: rgba(15, 23, 42, 0.9);
+			--text: #e0f2fe;
+			--muted: #94a3b8;
+			--accent: #60a5fa;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			min-height: 100vh;
+			margin: 0;
+			display: grid;
+			place-items: center;
+			padding: 20px;
+			font-family: Arial, sans-serif;
+			color: var(--text);
+			background: var(--background);
+			transition: background 0.3s, color 0.3s;
+		}
+
+		.clock-card {
+			width: min(100%, 560px);
+			padding: 42px 28px;
+			text-align: center;
+			background: var(--card);
+			border: 1px solid rgba(148, 163, 184, 0.25);
+			border-radius: 24px;
+			box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+			backdrop-filter: blur(10px);
+		}
+
+		h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 5vw, 2.8rem); }
+		#greeting { margin: 0 0 28px; color: var(--muted); font-size: 1.15rem; }
+
+		.time {
+			display: flex;
+			justify-content: center;
+			align-items: baseline;
+			gap: 8px;
+			font-size: clamp(3rem, 12vw, 6rem);
+			font-weight: 700;
+			letter-spacing: 2px;
+		}
+
+		#ampm { color: var(--accent); font-size: 1.25rem; letter-spacing: 0; }
+		#date { margin: 18px 0 30px; color: var(--muted); font-size: 1.05rem; }
+
+		.controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+		button {
+			padding: 11px 16px;
+			border: 0;
+			border-radius: 10px;
+			color: white;
+			background: var(--accent);
+			cursor: pointer;
+			font: inherit;
+		}
+		button:hover { opacity: 0.85; }
+	</style>
+</head>
+<body>
+	<main class="clock-card">
+		<h1 id="greeting">Good Morning</h1>
+		<div class="time" aria-label="Current time">
+			<span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+			<span id="ampm">AM</span>
+		</div>
+		<p id="date">Loading date...</p>
+		<div class="controls">
+			<button id="formatToggle" type="button">Switch to 24-hour</button>
+			<button id="themeToggle" type="button">🌙 Dark Mode</button>
+		</div>
+	</main>
+
+	<script>
+		const hoursElement = document.getElementById('hours');
+		const minutesElement = document.getElementById('minutes');
+		const secondsElement = document.getElementById('seconds');
+		const ampmElement = document.getElementById('ampm');
+		const dateElement = document.getElementById('date');
+		const greetingElement = document.getElementById('greeting');
+		const formatToggle = document.getElementById('formatToggle');
+		const themeToggle = document.getElementById('themeToggle');
+		let is24Hour = false;
+
+		function updateClock() {
+			const now = new Date();
+			const hour = now.getHours();
+			const displayHour = is24Hour ? hour : (hour % 12 || 12);
+
+			hoursElement.textContent = String(displayHour).padStart(2, '0');
+			minutesElement.textContent = String(now.getMinutes()).padStart(2, '0');
+			secondsElement.textContent = String(now.getSeconds()).padStart(2, '0');
+			ampmElement.textContent = is24Hour ? '' : (hour >= 12 ? 'PM' : 'AM');
+			dateElement.textContent = now.toLocaleDateString(undefined, {
+				weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+			});
+
+			greetingElement.textContent = hour < 12 ? 'Good Morning' :
+				hour < 17 ? 'Good Afternoon' : 'Good Evening';
+		}
+
+		formatToggle.addEventListener('click', () => {
+			is24Hour = !is24Hour;
+			formatToggle.textContent = is24Hour ? 'Switch to 12-hour' : 'Switch to 24-hour';
+			updateClock();
+		});
+
+		themeToggle.addEventListener('click', () => {
+			document.body.classList.toggle('dark');
+			themeToggle.textContent = document.body.classList.contains('dark')
+				? '☀️ Light Mode' : '🌙 Dark Mode';
+		});
+
+		updateClock();
+		setInterval(updateClock, 1000);
+	</script>
+</body>
+</html>

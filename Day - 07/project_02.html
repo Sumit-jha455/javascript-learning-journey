@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Age Calculator</title>
+	<style>
+		body { font-family: Arial, sans-serif; background: #e8f0fe; padding: 30px; }
+		.box { max-width: 500px; margin: auto; padding: 25px; background: white; border-radius: 10px; box-shadow: 0 4px 15px #0002; }
+		h1 { color: #3157c9; text-align: center; }
+		label, input, button { display: block; width: 100%; margin-bottom: 15px; }
+		input, button { box-sizing: border-box; padding: 12px; font-size: 16px; }
+		button { border: 0; border-radius: 5px; color: white; background: #3157c9; cursor: pointer; }
+		#error { color: #d33; text-align: center; }
+		#results { display: none; line-height: 1.8; }
+		strong { color: #3157c9; }
+	</style>
+</head>
+<body>
+	<div class="box">
+		<h1>🎂 Age Calculator</h1>
+		<label for="birthDate">Enter your date of birth:</label>
+		<input type="date" id="birthDate">
+		<button onclick="calculateAge()">Calculate Age</button>
+		<p id="error"></p>
+
+		<div id="results">
+			<p>Age: <strong id="age"></strong></p>
+			<p>Next birthday: <strong id="birthday"></strong></p>
+			<p>Total days lived: <strong id="daysLived"></strong></p>
+			<p>Age in hours: <strong id="hoursLived"></strong></p>
+			<p>Age in minutes: <strong id="minutesLived"></strong></p>
+		</div>
+	</div>
+
+	<script>
+		let birthdayTimer;
+
+		function calculateAge() {
+			const input = document.getElementById('birthDate').value;
+			const error = document.getElementById('error');
+			const results = document.getElementById('results');
+
+			if (!input) {
+				error.textContent = 'Please select your date of birth.';
+				results.style.display = 'none';
+				return;
+			}
+
+			const dateParts = input.split('-');
+			const birthDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+			const now = new Date();
+
+			if (birthDate > now) {
+				error.textContent = 'Date of birth cannot be in the future.';
+				results.style.display = 'none';
+				return;
+			}
+
+			error.textContent = '';
+			results.style.display = 'block';
+
+			let years = now.getFullYear() - birthDate.getFullYear();
+			let months = now.getMonth() - birthDate.getMonth();
+			let days = now.getDate() - birthDate.getDate();
+
+			if (days < 0) {
+				months--;
+				days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+			}
+			if (months < 0) {
+				years--;
+				months += 12;
+			}
+
+			document.getElementById('age').textContent = years + ' years, ' + months + ' months, ' + days + ' days';
+
+			const milliseconds = now - birthDate;
+			document.getElementById('daysLived').textContent = Math.floor(milliseconds / 86400000).toLocaleString();
+			document.getElementById('hoursLived').textContent = Math.floor(milliseconds / 3600000).toLocaleString();
+			document.getElementById('minutesLived').textContent = Math.floor(milliseconds / 60000).toLocaleString();
+
+			clearInterval(birthdayTimer);
+			showBirthdayCountdown(birthDate);
+			birthdayTimer = setInterval(function () { showBirthdayCountdown(birthDate); }, 1000);
+		}
+
+		function showBirthdayCountdown(birthDate) {
+			const now = new Date();
+			let nextBirthday = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+			if (nextBirthday <= now) nextBirthday.setFullYear(now.getFullYear() + 1);
+
+			const difference = nextBirthday - now;
+			const days = Math.floor(difference / 86400000);
+			const hours = Math.floor((difference % 86400000) / 3600000);
+			const minutes = Math.floor((difference % 3600000) / 60000);
+			const seconds = Math.floor((difference % 60000) / 1000);
+
+			document.getElementById('birthday').textContent = days + ' days, ' + hours + ' hours, ' + minutes + ' minutes, ' + seconds + ' seconds';
+		}
+	</script>
+</body>
+</html>
